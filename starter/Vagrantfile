@@ -7,26 +7,26 @@ Vagrant.configure("2") do |config|
   config.ssh.username = 'root'
   config.ssh.password = 'vagrant'
   config.ssh.insert_key = 'true'
-
+    
   NodeCount = 1
 
   # configure Kubernetes Nodes
   (1..NodeCount).each do |i|
     config.vm.define "node#{i}" do |node|
       # set base image for the vagrant box
-      config.vm.box = "opensuse/Leap-15.2.x86_64"
-
+      config.vm.box = "opensuse/Leap-15.3.x86_64"
+      config.vm.box_version = "15.3.9.230"
       # set the static IP for the vagrant box
       node.vm.network "private_network", ip: "192.168.50.10#{i}"
       # configure the parameters for VirtualBox provider
       node.vm.provider "virtualbox" do |v|
         v.name = "node#{i}"
-        v.memory = 2048
-        v.cpus = 2
+        v.memory = 4096
+        v.cpus = 3
+        v.customize ["modifyvm", :id, "--ioapic", "on"]
       end
 
     config.vm.provision "shell", inline: <<-SHELL
-      sudo zypper --non-interactive install apparmor-parser
       # install Docker
       zypper --non-interactive install docker #python3-docker-compose
       systemctl enable docker
@@ -35,4 +35,3 @@ Vagrant.configure("2") do |config|
     SHELL
     end
   end
-end
